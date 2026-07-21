@@ -75,3 +75,31 @@ Interno: la solicitud de aprobación enviada al responsable de Growthive.
 Externo: la propuesta final enviada al prospecto, y las notificaciones de error cuando algo falla.
 
 Cada correo se dirige dinámicamente al destinatario correspondiente (por ejemplo, {{ $('Crear Lead en Airtable').item.json['Email'] }} para el prospecto), sin direcciones ni contenido hardcodeado.
+
+Diagrama del flujo:
+Formulario (Form Trigger)
+        │
+        ▼
+Crear Lead en Airtable (Estado: Pendiente)
+        │
+        ▼
+Validar Datos Completos ──[faltan datos]──► Registrar Error en Airtable ──► Notificar Error
+        │ [datos OK]
+        ▼
+Preparar Prompt para IA
+        │
+        ▼
+Generar Propuesta con Groq (IA) ──[falla API]──► Registrar Error en Airtable ──► Notificar Error
+        │ [éxito]
+        ▼
+Extraer Texto de Propuesta
+        │
+        ▼
+Guardar Propuesta en Airtable (vinculada al Lead)
+        │
+        ▼
+Enviar Propuesta para Aprobación (Gmail — Send and Wait) ◄── Human-in-the-loop
+        │
+        ├──[Aprobada]──► Enviar Propuesta al Prospecto ──► Estado: Enviado
+        │
+        └──[Rechazada]──► Estado: Rechazado
